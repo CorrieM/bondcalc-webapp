@@ -12,7 +12,7 @@ import importlib.util
 from flask import Flask, render_template, request, jsonify, session
 from flask_cors import CORS
 from datetime import timedelta, datetime
-import openpyxl
+import openpyxl as xw
 import os
 import time
 
@@ -42,7 +42,6 @@ logger = setup_windows_event_log()
 # -----------------------------------
 required_packages = {
     'Flask-Cors': 'flask_cors',
-    'xlwings': 'xlwings',
     'openpyxl': 'openpyxl',
     'bcrypt': 'bcrypt',
     'mysql-connector-python': 'mysql.connector'
@@ -120,8 +119,7 @@ def calculate():
     session_timeout_check()
     try:
         logger.info("Received calculation request.")
-        excel = xw.App(visible=False)
-        wb = excel.books.open(EXCEL_PATH, read_only=False)
+        wb = excel.books.open(EXCEL_PATH)
         sheet = wb.sheets[0]
         sheet2 = wb.sheets[1]
 
