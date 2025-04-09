@@ -128,8 +128,8 @@ def calculate():
 
         wb = xw.load_workbook(EXCEL_PATH, data_only=True)
         igrow_input = wb["IGrow Internal Input"]
-        transfer_fees = wb["Transfer Fees"]
         input_data = wb["Input Data"]
+        transfer_fees = wb["Transfer Fees"]
 
         data = request.json
         rate = float(data.get("rate", 2)) / 100
@@ -154,40 +154,31 @@ def calculate():
         columns = ['B', 'C', 'D', 'E', 'F', 'G', 'H',
                    'I', 'J', 'K', 'L', 'M', 'O', 'Q', 'S', 'U']
 
-        def calculate_transfer_fee(base_val):
-            if base_val == 0:
-                return 0.0
+        def calculate_transfer_fee(val):
             for i, threshold in enumerate(thresholds):
-                if base_val < threshold:
+                if val < threshold:
                     col = columns[i]
-                    fee = safe_float(transfer_fees[f"{col}6"].value) * safe_float(transfer_fees[f"{col}7"].value)
-                    return round(fee, 2)
+                    unit_cost = safe_float(transfer_fees[f"{col}6"].value)
+                    multiplier = safe_float(transfer_fees[f"{col}7"].value)
+                    return unit_cost * multiplier
             return 0.0
 
         multipliers = [safe_float(input_data[f"E{i}"].value) for i in range(20, 25)]
 
-        commission_values = []
-        for i in range(5):
-            val = prop_values[i]
-            if val > 0:
-                fee = calculate_transfer_fee(val)
-                multiplier = multipliers[i]
-                commission_values.append(fee * multiplier)
-            else:
-                commission_values.append(0.0)
+        commission_base = safe_float(input_data["G19"].value)
+        commission_parts = [commission_base * multipliers[i] if prop_values[i] > 0 else 0.0 for i in range(5)]
+        total_commission = sum(commission_parts)
 
-        total_commission = sum(commission_values)
+        incentive_parts = [calculate_transfer_fee(prop_values[i]) * multipliers[i] if prop_values[i] > 0 else 0.0 for i in range(5)]
+        total_incentive = sum(incentive_parts)
 
-        # Read Transfer Incentive as G23 (already a calculated value)
-        transfer_incentive = safe_float(input_data["G23"].value)
-
-        final_total = total_commission + transfer_incentive
-        revenue_rate = (final_total / total_prop_value) * 100 if total_prop_value > 0 else 0.0
+        total = total_commission + total_incentive
+        revenue_rate = (total / total_prop_value) * 100 if total_prop_value > 0 else 0.0
 
         results = {
             "parameters": [
-                ("TransferIncentive", round(transfer_incentive, 2)),
-                ("TotalComm", round(final_total, 2)),
+                ("TransferIncentive", round(total_incentive, 2)),
+                ("TotalComm", round(total, 2)),
                 ("RevenueRate", round(revenue_rate, 2))
             ]
         }
