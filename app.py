@@ -125,38 +125,49 @@ def calculate():
     session_timeout_check()
     try:
         logger.info("Received calculation request.")
-        
+
         wb = xw.load_workbook(EXCEL_PATH)
-        sheet = wb.active
-        sheet2 = wb.worksheets[1]
+        igrow_input = wb["IGrow Internal Input"]
 
         data = request.json
         rate = float(data.get("rate", 2)) / 100
-        sheet2["H7"].value = rate
-        sheet2["H9"].value = float(data.get("PropValue1", 0))
-        sheet2["H11"].value = float(data.get("PropValue2", 0))
-        sheet2["H13"].value = float(data.get("PropValue3", 0))
-        sheet2["H15"].value = float(data.get("PropValue4", 0))
-        sheet2["H17"].value = float(data.get("PropValue5", 0))
+        prop1 = float(data.get("PropValue1", 0))
+        prop2 = float(data.get("PropValue2", 0))
+        prop3 = float(data.get("PropValue3", 0))
+        prop4 = float(data.get("PropValue4", 0))
+        prop5 = float(data.get("PropValue5", 0))
+
+        igrow_input["H7"].value = rate
+        igrow_input["H9"].value = prop1
+        igrow_input["H11"].value = prop2
+        igrow_input["H13"].value = prop3
+        igrow_input["H15"].value = prop4
+        igrow_input["H17"].value = prop5
 
         wb.save(EXCEL_PATH)
-        wb.close()
+
+        # Pull calculation values from sheet and replicate formula logic
+        transfer_incentive = float(igrow_input["H64"].value or 0)
+        commission_base = float(igrow_input["H19"].value or 1)  # avoid division by 0
+
+        h14 = commission_base * rate
+        total_comm = transfer_incentive + h14
+        revenue_rate = total_comm / commission_base
 
         results = {
             "parameters": [
-                ("TransferIncentive", round(safe_float(sheet["H17"].value), 2)),
-                ("TotalComm", round(safe_float(sheet["H20"].value), 2)),
-                ("RevenueRate", round(safe_float(sheet["H23"].value), 2))
+                ("TransferIncentive", round(transfer_incentive, 2)),
+                ("TotalComm", round(total_comm, 2)),
+                ("RevenueRate", round(revenue_rate * 100, 2))
             ]
         }
 
         logger.info("Calculation completed successfully.")
         return jsonify({"results": results})
-    
+
     except Exception as e:
         logger.error(f"Error during calculation: {str(e)}")
         return jsonify({"error": str(e), "results": {}})
-
 # -----------------------------------
 # Database Config
 # -----------------------------------
