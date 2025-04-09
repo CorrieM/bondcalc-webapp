@@ -146,14 +146,12 @@ def calculate():
 
         wb.save(EXCEL_PATH)
 
-        # Helper to safely get float
         def safe_float(val):
             try:
-                return float(val)
+                return float(str(val).replace("R", "").replace(",", "").replace("%", "").strip())
             except:
                 return 0.0
 
-        # Calculate G19 and G23 equivalents using H9 and H17
         thresholds = [500001, 1000001, 1500001, 2000001, 2500001, 3000001, 3500001,
                       4000001, 4500001, 5000001, 5500001, 6000001, 7000001, 8000001, 9000001, 10000001]
         columns = ['B', 'C', 'D', 'E', 'F', 'G', 'H',
@@ -169,40 +167,30 @@ def calculate():
                     return round(fee, 2)
             return 0.0
 
-        g19_simulated = calculate_transfer_fee(prop_values[0])
-        g23_simulated = calculate_transfer_fee(prop_values[4])
-
-        # Get E20-E24 from Input Data
-        e_values = [safe_float(input_data[f"E{20+i}"].value) for i in range(5)]
-
-        # Calculate Incentive using G23
-        incentive_values = []
-        for i in range(5):
-            if prop_values[i] > 0:
-                incentive = g23_simulated * e_values[i]
-            else:
-                incentive = 0.0
-            incentive_values.append(incentive)
-
-        transfer_incentive = round(sum(incentive_values), 2)
-
-        # Calculate Commission using G19
         commission_values = []
-        for i in range(5):
-            if prop_values[i] > 0:
-                commission = g19_simulated * e_values[i]
-            else:
-                commission = 0.0
-            commission_values.append(commission)
+        incentive_values = []
 
-        total_commission = round(sum(commission_values), 2)
-        revenue_rate = round((total_commission + transfer_incentive) / sum(prop_values) * 100, 2) if sum(prop_values) else 0
+        for i in range(5):
+            property_val = prop_values[i]
+            if property_val > 0:
+                fee = calculate_transfer_fee(property_val)
+                commission_values.append(fee)
+                incentive_values.append(fee)
+            else:
+                commission_values.append(0.0)
+                incentive_values.append(0.0)
+
+        total_commission = sum(commission_values)
+        total_incentive = sum(incentive_values)
+        final_total = total_commission + total_incentive
+        total_prop_value = sum(prop_values)
+        revenue_rate = (final_total / total_prop_value) * 100 if total_prop_value > 0 else 0.0
 
         results = {
             "parameters": [
-                ("TransferIncentive", transfer_incentive),
-                ("TotalComm", total_commission),
-                ("RevenueRate", revenue_rate)
+                ("TransferIncentive", round(total_incentive, 2)),
+                ("TotalComm", round(total_commission, 2)),
+                ("RevenueRate", round(revenue_rate, 2))
             ]
         }
 
