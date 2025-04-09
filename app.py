@@ -167,15 +167,18 @@ def calculate():
                     return round(fee, 2)
             return 0.0
 
+        multipliers = [safe_float(input_data[f"E{i}"].value) for i in range(20, 25)]
+
         commission_values = []
         incentive_values = []
 
         for i in range(5):
-            property_val = prop_values[i]
-            if property_val > 0:
-                fee = calculate_transfer_fee(property_val)
-                commission_values.append(fee)
-                incentive_values.append(fee)
+            val = prop_values[i]
+            if val > 0:
+                fee = calculate_transfer_fee(val)
+                multiplier = multipliers[i]
+                commission_values.append(fee * multiplier)
+                incentive_values.append(fee * multiplier)
             else:
                 commission_values.append(0.0)
                 incentive_values.append(0.0)
@@ -200,6 +203,7 @@ def calculate():
     except Exception as e:
         logger.error(f"Error during calculation: {str(e)}")
         return jsonify({"error": str(e), "results": {}})
+
 # -----------------------------------
 # Database Config
 # -----------------------------------
