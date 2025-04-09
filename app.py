@@ -137,13 +137,19 @@ def calculate():
         total_comm = sheet["H20"].value
         revenue_rate = sheet["H23"].value
 
-        results = {
-            "parameters": [
-                ("TransferIncentive", round(transfer_incentive or 0, 2)),
-                ("TotalComm", round(total_comm or 0, 2)),
-                ("RevenueRate", round(revenue_rate or 0, 2))
-            ]
-        }
+results = {
+    "parameters": [
+        ("TransferIncentive", round(safe_float(sheet["H17"].value), 2)),
+        ("TotalComm", round(safe_float(sheet["H20"].value), 2)),
+        ("RevenueRate", round(safe_float(sheet["H23"].value), 2))
+    ]
+}
+
+def safe_float(val):
+    try:
+        return float(str(val).replace("R", "").replace(",", "").replace("%", "").strip())
+    except:
+        return 0.0
 
         wb.save(EXCEL_PATH)
         wb.close()
