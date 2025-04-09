@@ -114,49 +114,45 @@ def session_timeout_check():
 def home():
     return render_template('index.html')
 
-@app.route('/calculate', methods=['POST'])
-def calculate():
-    session_timeout_check()
-    try:
-        logger.info("Received calculation request.")
-        wb = xw.load_workbook(EXCEL_PATH)
-        sheet = wb.worksheets[0]
-        sheet2 = wb.worksheets[1]
-
-        data = request.json
-        rate = float(data.get("rate", 2)) / 100
-        sheet2["H7"] = rate
-        sheet2["H9"] = float(data.get("PropValue1", 0))
-        sheet2["H11"] = float(data.get("PropValue2", 0))
-        sheet2["H13"] = float(data.get("PropValue3", 0))
-        sheet2["H15"] = float(data.get("PropValue4", 0))
-        sheet2["H17"] = float(data.get("PropValue5", 0))
-
-        # openpyxl doesn't support formulas auto-recalc, so simulate results:
-        transfer_incentive = sheet["H17"].value
-        total_comm = sheet["H20"].value
-        revenue_rate = sheet["H23"].value
-
-results = {
-    "parameters": [
-        ("TransferIncentive", round(safe_float(sheet["H17"].value), 2)),
-        ("TotalComm", round(safe_float(sheet["H20"].value), 2)),
-        ("RevenueRate", round(safe_float(sheet["H23"].value), 2))
-    ]
-}
-
 def safe_float(val):
     try:
         return float(str(val).replace("R", "").replace(",", "").replace("%", "").strip())
     except:
         return 0.0
 
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    session_timeout_check()
+    try:
+        logger.info("Received calculation request.")
+        
+        wb = xw.load_workbook(EXCEL_PATH)
+        sheet = wb.active
+        sheet2 = wb.worksheets[1]
+
+        data = request.json
+        rate = float(data.get("rate", 2)) / 100
+        sheet2["H7"].value = rate
+        sheet2["H9"].value = float(data.get("PropValue1", 0))
+        sheet2["H11"].value = float(data.get("PropValue2", 0))
+        sheet2["H13"].value = float(data.get("PropValue3", 0))
+        sheet2["H15"].value = float(data.get("PropValue4", 0))
+        sheet2["H17"].value = float(data.get("PropValue5", 0))
+
         wb.save(EXCEL_PATH)
         wb.close()
 
+        results = {
+            "parameters": [
+                ("TransferIncentive", round(safe_float(sheet["H17"].value), 2)),
+                ("TotalComm", round(safe_float(sheet["H20"].value), 2)),
+                ("RevenueRate", round(safe_float(sheet["H23"].value), 2))
+            ]
+        }
+
         logger.info("Calculation completed successfully.")
         return jsonify({"results": results})
-
+    
     except Exception as e:
         logger.error(f"Error during calculation: {str(e)}")
         return jsonify({"error": str(e), "results": {}})
