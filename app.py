@@ -166,10 +166,10 @@ def calculate():
         multipliers = [safe_float(input_data[f"E{i}"].value) for i in range(20, 25)]
 
         commission_base = safe_float(input_data["G19"].value)
-        commission_parts = [commission_base * multipliers[i] if prop_values[i] > 0 else 0.0 for i in range(5)]
+        commission_parts = [commission_base * multipliers[i] if prop_values[i] > 0 else 0.0 for i in range(4)]
         total_commission = sum(commission_parts)
 
-        incentive_parts = [calculate_transfer_fee(prop_values[i]) * multipliers[i] if prop_values[i] > 0 else 0.0 for i in range(5)]
+        incentive_parts = [calculate_transfer_fee(prop_values[i]) * multipliers[i] if prop_values[i] > 0 else 0.0 for i in range(4)]
         total_incentive = sum(incentive_parts)
 
         total = total_commission + total_incentive
