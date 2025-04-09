@@ -173,12 +173,13 @@ def calculate():
         total_incentive = sum(incentive_parts)
 
         total = total_commission + total_incentive
+        ctotal = total + total_incentive;
         revenue_rate = (total / total_prop_value) * 100 if total_prop_value > 0 else 0.0
 
         results = {
             "parameters": [
                 ("TransferIncentive", round(total_incentive, 2)),
-                ("TotalComm", round(total, 2)),
+                ("TotalComm", round(ctotal, 2)),
                 ("RevenueRate", round(revenue_rate, 2))
             ]
         }
