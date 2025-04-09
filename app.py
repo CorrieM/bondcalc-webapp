@@ -128,37 +128,81 @@ def calculate():
 
         wb = xw.load_workbook(EXCEL_PATH)
         igrow_input = wb["IGrow Internal Input"]
+        transfer_fees = wb["Transfer Fees"]
+        input_data = wb["Input Data"]
 
         data = request.json
         rate = float(data.get("rate", 2)) / 100
-        prop1 = float(data.get("PropValue1", 0))
-        prop2 = float(data.get("PropValue2", 0))
-        prop3 = float(data.get("PropValue3", 0))
-        prop4 = float(data.get("PropValue4", 0))
-        prop5 = float(data.get("PropValue5", 0))
+        prop_values = [
+            float(data.get("PropValue1", 0)),
+            float(data.get("PropValue2", 0)),
+            float(data.get("PropValue3", 0)),
+            float(data.get("PropValue4", 0)),
+            float(data.get("PropValue5", 0))
+        ]
 
-        igrow_input["H7"].value = rate
-        igrow_input["H9"].value = prop1
-        igrow_input["H11"].value = prop2
-        igrow_input["H13"].value = prop3
-        igrow_input["H15"].value = prop4
-        igrow_input["H17"].value = prop5
+        for i, val in enumerate(["H9", "H11", "H13", "H15", "H17"]):
+            igrow_input[val].value = prop_values[i]
 
         wb.save(EXCEL_PATH)
 
-        # Pull calculation values from sheet and replicate formula logic
-        transfer_incentive = float(igrow_input["H64"].value or 0)
-        commission_base = float(igrow_input["H19"].value or 1)  # avoid division by 0
+        # Helper to safely get float
+        def safe_float(val):
+            try:
+                return float(val)
+            except:
+                return 0.0
 
-        h14 = commission_base * rate
-        total_comm = transfer_incentive + h14
-        revenue_rate = total_comm / commission_base
+        # Calculate G19 and G23 equivalents using H9 and H17
+        thresholds = [500001, 1000001, 1500001, 2000001, 2500001, 3000001, 3500001,
+                      4000001, 4500001, 5000001, 5500001, 6000001, 7000001, 8000001, 9000001, 10000001]
+        columns = ['B', 'C', 'D', 'E', 'F', 'G', 'H',
+                   'I', 'J', 'K', 'L', 'M', 'O', 'Q', 'S', 'U']
+
+        def calculate_transfer_fee(base_val):
+            if base_val == 0:
+                return 0.0
+            for i, threshold in enumerate(thresholds):
+                if base_val < threshold:
+                    col = columns[i]
+                    fee = safe_float(transfer_fees[f"{col}6"].value) * safe_float(transfer_fees[f"{col}7"].value)
+                    return round(fee, 2)
+            return 0.0
+
+        g19_simulated = calculate_transfer_fee(prop_values[0])
+        g23_simulated = calculate_transfer_fee(prop_values[4])
+
+        # Get E20-E24 from Input Data
+        e_values = [safe_float(input_data[f"E{20+i}"].value) for i in range(5)]
+
+        # Calculate Incentive using G23
+        incentive_values = []
+        for i in range(5):
+            if prop_values[i] > 0:
+                incentive = g23_simulated * e_values[i]
+            else:
+                incentive = 0.0
+            incentive_values.append(incentive)
+
+        transfer_incentive = round(sum(incentive_values), 2)
+
+        # Calculate Commission using G19
+        commission_values = []
+        for i in range(5):
+            if prop_values[i] > 0:
+                commission = g19_simulated * e_values[i]
+            else:
+                commission = 0.0
+            commission_values.append(commission)
+
+        total_commission = round(sum(commission_values), 2)
+        revenue_rate = round((total_commission + transfer_incentive) / sum(prop_values) * 100, 2) if sum(prop_values) else 0
 
         results = {
             "parameters": [
-                ("TransferIncentive", round(transfer_incentive, 2)),
-                ("TotalComm", round(total_comm, 2)),
-                ("RevenueRate", round(revenue_rate * 100, 2))
+                ("TransferIncentive", transfer_incentive),
+                ("TotalComm", total_commission),
+                ("RevenueRate", revenue_rate)
             ]
         }
 
