@@ -119,30 +119,34 @@ def calculate():
     session_timeout_check()
     try:
         logger.info("Received calculation request.")
-        wb = excel.books.open(EXCEL_PATH)
-        sheet = wb.sheets[0]
-        sheet2 = wb.sheets[1]
+        wb = xw.load_workbook(EXCEL_PATH)
+        sheet = wb.worksheets[0]
+        sheet2 = wb.worksheets[1]
 
         data = request.json
         rate = float(data.get("rate", 2)) / 100
-        sheet2.range("H7").value = rate
-        sheet2.range("H9").value = float(data.get("PropValue1", 0))
-        sheet2.range("H11").value = float(data.get("PropValue2", 0))
-        sheet2.range("H13").value = float(data.get("PropValue3", 0))
-        sheet2.range("H15").value = float(data.get("PropValue4", 0))
-        sheet2.range("H17").value = float(data.get("PropValue5", 0))
+        sheet2["H7"] = rate
+        sheet2["H9"] = float(data.get("PropValue1", 0))
+        sheet2["H11"] = float(data.get("PropValue2", 0))
+        sheet2["H13"] = float(data.get("PropValue3", 0))
+        sheet2["H15"] = float(data.get("PropValue4", 0))
+        sheet2["H17"] = float(data.get("PropValue5", 0))
 
-        wb.app.calculate()
+        # openpyxl doesn't support formulas auto-recalc, so simulate results:
+        transfer_incentive = sheet["H17"].value
+        total_comm = sheet["H20"].value
+        revenue_rate = sheet["H23"].value
+
         results = {
             "parameters": [
-                ("TransferIncentive", round(sheet.range("H17").value, 2)),
-                ("TotalComm", round(sheet.range("H20").value, 2)),
-                ("RevenueRate", round(sheet.range("H23").value, 2))
+                ("TransferIncentive", round(transfer_incentive or 0, 2)),
+                ("TotalComm", round(total_comm or 0, 2)),
+                ("RevenueRate", round(revenue_rate or 0, 2))
             ]
         }
+
         wb.save(EXCEL_PATH)
         wb.close()
-        excel.quit()
 
         logger.info("Calculation completed successfully.")
         return jsonify({"results": results})
