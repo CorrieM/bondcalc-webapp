@@ -67,7 +67,7 @@ function shutdownPython() {
     }
   });
 
-  fetch("http://127.0.0.1:5001/shutdown", { method: "POST" })
+  fetch("/shutdown", { method: "POST" })
     .then((res) => {
       if (res.ok) {
         console.log("✅ Flask shutdown endpoint called.");
@@ -101,7 +101,7 @@ app.on("window-all-closed", () => {
 });
 
 ipcMain.on("login", (event, credentials) => {
-  fetch("http://127.0.0.1:5001/login", {
+  fetch("/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(credentials),
