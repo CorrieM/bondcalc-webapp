@@ -12,7 +12,6 @@ import importlib.util
 from flask import Flask, render_template, request, jsonify, session
 from flask_cors import CORS
 from datetime import timedelta, datetime
-import xlwings as xw
 import openpyxl
 import os
 import time
