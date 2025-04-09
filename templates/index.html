@@ -488,7 +488,7 @@ if (propertyCount >= 5) {
   });
   //send the data to the endpoint
   const data = { rate, PropValue1,PropValue2,PropValue3,PropValue4,PropValue5 };
-  fetch("http://127.0.0.1:5001/calculate", {
+  fetch("/calculate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
