@@ -170,21 +170,21 @@ def calculate():
         multipliers = [safe_float(input_data[f"E{i}"].value) for i in range(20, 25)]
 
         commission_values = []
-        incentive_values = []
-
         for i in range(5):
             val = prop_values[i]
             if val > 0:
                 fee = calculate_transfer_fee(val)
                 multiplier = multipliers[i]
                 commission_values.append(fee * multiplier)
-                incentive_values.append(fee * multiplier)
             else:
                 commission_values.append(0.0)
-                incentive_values.append(0.0)
 
         total_commission = sum(commission_values)
-        total_incentive = sum(incentive_values)
+
+        # Apply incentive as G23 once — do not multiply by property
+        incentive_base = safe_float(input_data["G23"].value)
+        total_incentive = incentive_base
+
         final_total = total_commission + total_incentive
         total_prop_value = sum(prop_values)
         revenue_rate = (final_total / total_prop_value) * 100 if total_prop_value > 0 else 0.0
@@ -192,7 +192,7 @@ def calculate():
         results = {
             "parameters": [
                 ("TransferIncentive", round(total_incentive, 2)),
-                ("TotalComm", round(total_commission, 2)),
+                ("TotalComm", round(final_total, 2)),
                 ("RevenueRate", round(revenue_rate, 2))
             ]
         }
