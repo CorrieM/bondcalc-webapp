@@ -126,7 +126,7 @@ def calculate():
     try:
         logger.info("Received calculation request.")
 
-        wb = xw.load_workbook(EXCEL_PATH)
+        wb = xw.load_workbook(EXCEL_PATH, data_only=True)
         igrow_input = wb["IGrow Internal Input"]
         transfer_fees = wb["Transfer Fees"]
         input_data = wb["Input Data"]
@@ -141,10 +141,7 @@ def calculate():
             float(data.get("PropValue5", 0))
         ]
 
-        for i, val in enumerate(["H9", "H11", "H13", "H15", "H17"]):
-            igrow_input[val].value = prop_values[i]
-
-        wb.save(EXCEL_PATH)
+        total_prop_value = sum(prop_values)
 
         def safe_float(val):
             try:
@@ -181,17 +178,15 @@ def calculate():
 
         total_commission = sum(commission_values)
 
-        # Apply incentive as G23 once — do not multiply by property
-        incentive_base = safe_float(input_data["G23"].value)
-        total_incentive = incentive_base
+        # Read Transfer Incentive as G23 (already a calculated value)
+        transfer_incentive = safe_float(input_data["G23"].value)
 
-        final_total = total_commission + total_incentive
-        total_prop_value = sum(prop_values)
+        final_total = total_commission + transfer_incentive
         revenue_rate = (final_total / total_prop_value) * 100 if total_prop_value > 0 else 0.0
 
         results = {
             "parameters": [
-                ("TransferIncentive", round(total_incentive, 2)),
+                ("TransferIncentive", round(transfer_incentive, 2)),
                 ("TotalComm", round(final_total, 2)),
                 ("RevenueRate", round(revenue_rate, 2))
             ]
