@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Bond Comparison Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    @import url("https://fonts.googleapis.com/css?family=Montserrat:500,400,600");
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .button-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid white;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-left: 8px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .button-disabled {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    main {
+      width: 100%;
+      max-width: 1280px;
+      padding: 96px 32px 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .header {
+      width: 100%;
+      max-width: 842px;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #a11d23;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.28px;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 40px;
+      font-weight: 600;
+      letter-spacing: -0.8px;
+      line-height: 48px;
+      margin-bottom: 12px;
+    }
+
+    .description {
+      color: #404040;
+      font-size: 16px;
+      letter-spacing: -0.32px;
+    }
+
+
+    .input-card {
+      width: auto;
+      background: white;
+      border: 1px solid #cccccc;
+      border-radius: 12px;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .input-section {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: auto;
+    }
+
+    .input-label {
+      color: #b7364a;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .input-control {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .input-value {
+      font-size: 14px;
+      font-weight: 600;
+      height: 25px;
+      width: 130px;
+      padding: 8px;
+      border: 2px solid #B7364B;
+      border-radius: 8px;
+    }
+
+    .number-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .control-btn {
+      width: 32px;
+      height: 32px;
+      border: 1px solid #e6e6e6;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #666;
+    }
+
+    .separator {
+      width: 1px;
+      height: 40px;
+      background: #e6e6e6;
+      margin: 0 24px;
+    }
+
+    .primary-btn {
+      background: #b7364a;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: background-color 0.2s ease;
+    }
+
+    .primary-btn:hover {
+      background: #a11d23;
+    }
+
+    .comparison-cards {
+      display: flex;
+      gap: 32px;
+      width: 842px;
+    }
+
+    .card {
+      flex: 1;
+      padding: 24px;
+      border-radius: 12px;
+      color: white;
+    }
+
+    .igrow-card {
+      background: #a11d23;
+    }
+
+    .competitor-card {
+      background: #008a00;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .switch-btn {
+      background: rgba(255, 255, 255, 0.32);
+      border: none;
+      border-radius: 999px;
+      padding: 8px 16px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .comparison-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.32);
+    }
+
+    .earnings-section {
+      margin-top: 24px;
+    }
+
+    .earnings-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .large-value {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .secondary-btn {
+      bottom: 64px;
+      right: 64px;
+      background: transparent;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      transition: background-color 0.2s ease;
+    }
+
+    .secondary-btn:hover {
+      background: #E6E6E6;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+  <main>
+    <div class="header">
+      <div class="subtitle">CALCULATE CLIENT POTENTIAL</div>
+      <h1>Bond Comparison Calculator</h1>
+      <div class="description">See how IGrow compares to competitors and maximise your sales returns.</div>
+    </div>
+
+    <div class="input-card">
+      <div class="input-section">
+        <div class="input-group">
+          <div class="input-label">Number of Properties</div>
+          <div class="input-control">
+            <input id="propCount" type="number" class="input-value" value="5" min="1" max="5">
+            <!-- <div class="number-controls">
+              <button class="control-btn">−</button>
+              <button class="control-btn">+</button>
+            </div> -->
+          </div>
+        </div>
+
+        <div class="separator"></div>
+
+        <div class="input-group">
+          <div class="input-label">Average Property Value (R)</div>
+          <input id="avgPropValue" class="input-value" value="R10,000,000.00">
+        </div>
+
+        <div class="separator"></div>
+
+        <div class="input-group">
+          <div class="input-label">Rate (%)</div>
+          <div class="input-section">
+            <input class="input-value" type="number" id="rate" value="0.50" min="0" max="0.5" step="0.025" />
+          </div>
+        </div>
+
+      </div>
+      <div class="separator"></div>
+      <button id="calc" class="primary-btn" onclick="withSpinner(calculate, this)" >Calculate</button>
+    </div>
+
+    <div class="comparison-cards">
+      <div class="card igrow-card">
+        <div class="card-header">
+          <div class="card-title">IGROW</div>
+        </div>
+        <div class="comparison-row">
+          <div>Rate</div>
+          <div>0.50%</div>
+        </div>
+        <div class="comparison-row">
+          <div>Commission</div>
+          <div>R 250,000.00</div>
+        </div>
+        <div class="comparison-row">
+          <div>Transfer Incentive</div>
+          <div id="transferIncentive">R 89,260.00</div>
+        </div>
+        <div class="comparison-row">
+          <div>Total Commission</div>
+          <div id="totalComm">R 339,260.00</div>
+        </div>
+        <div class="comparison-row">
+          <div>Revenue Rate</div>
+          <div id="revenueRate">0.68%</div>
+        </div>
+        <div class="earnings-section">
+          <div class="earnings-title">Total Earnings</div>
+          <div class="comparison-row">
+            <div>Per Month</div>
+            <div id="perMonth" class="large-value">R 339,260.00</div>
+          </div>
+          <div class="comparison-row">
+            <div>Per Anum</div>
+            <div id="perYear" class="large-value">R 4,071,120.00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card competitor-card">
+        <div class="card-header">
+          <div class="card-title">Competitor 1</div>
+          <button class="switch-btn" onclick="withSpinner(Onswitch, this)" >SWITCH</button>
+        </div>
+        <div class="comparison-row">
+          <div>Rate</div>
+          <div id="comp1Rate">0.25%</div>
+        </div>
+        <div class="comparison-row">
+          <div>Commission</div>
+          <div id="comp1Comm">R 125,000.00</div>
+        </div>
+        <div class="comparison-row">
+          <div>Transfer Incentive</div>
+          <div>R 0.00</div>
+        </div>
+        <div class="comparison-row">
+          <div>Total Commission</div>
+          <div id="comp1TotalComm">R 125,000.00</div>
+        </div>
+        <div class="comparison-row">
+          <div>Revenue Rate</div>
+          <div id="comp1RevRate">0.25%</div>
+        </div>
+        <div class="earnings-section">
+          <div class="earnings-title">Total Earnings</div>
+          <div class="comparison-row">
+            <div>Per Month</div>
+            <div id="comp1MonthComm" class="large-value">R 125,000.00</div>
+          </div>
+          <div class="comparison-row">
+            <div>Per Anum</div>
+            <div id="comp1anum" class="large-value">R 1,500,000.00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <button class="secondary-btn" onclick="downloadPDF()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 6 2 18 2 18 9"></polyline>
+      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+      <rect x="6" y="14" width="12" height="8"></rect>
+    </svg>
+    PRINT
+  </button>
+
+  <script>
+  // Handle increment/decrement
+  const controlBtns = document.querySelectorAll('.control-btn');
+  //const numInput = document.querySelector('.input-control .input-value');
+
+  //let number = parseInt(numInput.textContent.trim());
+
+
+  // Make property value editable with currency symbol
+  const propValueContainer = document.querySelectorAll('.input-value')[1];
+  const initialPropValue = propValueContainer.textContent;
+
+  const propInput = document.createElement('input');
+  propInput.type = 'text';
+  propInput.value = initialPropValue.replace(/[^0-9,.]/g, '');
+  propInput.style.border = 'none';
+  propInput.style.outline = 'none';
+  propInput.style.fontWeight = '600';
+  propInput.style.fontSize = '16px';
+  propInput.style.width = '120px';
+
+  propValueContainer.textContent = 'R';
+  propValueContainer.appendChild(propInput);
+  let compRate = 0.0025;
+  let toggleState = false; // Tracks which state we're in
+  function Onswitch() {
+    toggleState = !toggleState; // Flip the toggle
+
+    if (toggleState) {
+      compRate = 0.0040;
+      const comprate =  ((compRate)*100).toFixed(2)+"%";
+      document.getElementById("comp1Rate").textContent = comprate;
+      document.getElementById("comp1RevRate").textContent = comprate;
+      calculate();
+      document.querySelectorAll('.competitor-card').forEach(el => {
+        el.style.background = '#bbbbbb'; // grey background
+        const title = el.querySelector('.card-title');
+        if (title) title.textContent = 'Competitor 2';
+      });
+    } else {
+      compRate = 0.0025;
+      const comprate =  ((compRate)*100).toFixed(2)+"%";
+      document.getElementById("comp1Rate").textContent = comprate;
+      document.getElementById("comp1RevRate").textContent = comprate;
+      calculate();
+      document.querySelectorAll('.competitor-card').forEach(el => {
+        el.style.background = '#008a00'; // white background
+        const title = el.querySelector('.card-title');
+        if (title) title.textContent = 'Competitor 1';
+      });
+    }    
+  }
+
+  function calculate() {
+  compRate = parseFloat(compRate) || 0;
+  let rate = parseFloat(document.getElementById("rate").value) || 0;
+  let rawValue = document.getElementById("avgPropValue").value;
+  let AVGPropValue = parseFloat(rawValue.replace(/[R,\s]/g, '')) || 0;
+  let propertyCount = parseInt(document.getElementById("propCount").value) || 0;
+  let TotalTransactionValue = AVGPropValue * propertyCount;
+
+let PropValue1 = 0;
+let PropValue2 = 0;
+let PropValue3 = 0;
+let PropValue4 = 0;
+let PropValue5 = 0;
+
+if (propertyCount >= 1) {
+  PropValue1 = parseFloat(AVGPropValue) || 0;
+}
+
+if (propertyCount >= 2) {
+  PropValue2 = parseFloat(AVGPropValue) || 0;
+}
+
+if (propertyCount >= 3) {
+  PropValue3 = parseFloat(AVGPropValue) || 0;
+}
+
+if (propertyCount >= 4) {
+  PropValue4 = parseFloat(AVGPropValue) || 0;
+}
+
+if (propertyCount >= 5) {
+  PropValue5 = parseFloat(AVGPropValue) || 0;
+}
+
+  let PropTotal = PropValue1+PropValue2+PropValue3+PropValue4+PropValue5;
+
+  let comm = PropTotal * rate * 0.01;
+  let propTotal = parseFloat(PropTotal) || 0;
+
+  const formattedComm = "R " + comm.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+  const igrowCardRows = document.querySelectorAll(".igrow-card .comparison-row");
+  igrowCardRows.forEach(row => {
+    if (row.children[0]?.textContent?.trim() === "Commission") {
+      row.children[1].textContent = formattedComm;
+    }
+  });
+  //send the data to the endpoint
+  const data = { rate, PropValue1,PropValue2,PropValue3,PropValue4,PropValue5 };
+  fetch("http://127.0.0.1:5001/calculate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        alert("Error: " + data.error);
+        return;
+      }
+
+      const results = data.results;
+      let perMonth = 0;
+      let perYear = 0;
+
+      results.parameters.forEach(([key, value]) => {
+  if (key === "TransferIncentive") {
+    const formattedValue = "R " + value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+    document.getElementById("transferIncentive").textContent = formattedValue;
+  }
+
+  const perMonthComp = PropTotal*compRate;
+  const perMonthCompformattedValue = "R " + perMonthComp.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+  document.getElementById("comp1Comm").textContent = perMonthCompformattedValue;
+  document.getElementById("comp1TotalComm").textContent = perMonthCompformattedValue;
+  document.getElementById("comp1MonthComm").textContent = perMonthCompformattedValue;
+
+  const perAnumComp = perMonthComp*12;
+  let finalperAnumComp = "R " + perAnumComp.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+  document.getElementById("comp1anum").textContent = finalperAnumComp;
+
+    if (key === "TotalComm") {
+      perMonth = value;
+      perYear  = perMonth * 12;
+    const formattedValue = "R " + value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+    const perMonthformattedValue = "R " + perMonth.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+    const perYearformattedValue = "R " + perYear.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+    document.getElementById("totalComm").textContent = formattedValue;
+    document.getElementById("perMonth").textContent = perMonthformattedValue;
+    document.getElementById("perYear").textContent = perYearformattedValue;
+  }
+
+    const revenueRate =  ((perMonth/propTotal)*100).toFixed(2)+"%";
+    document.getElementById("revenueRate").textContent = revenueRate;
+
+});
+
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      alert("An error occurred while calculating. Please try again.");
+    });
+}
+        
+        function downloadPDF() {
+    const downloadButton = document.querySelector('.secondary-btn');
+    downloadButton.style.display = 'none'; // Hide button during PDF generation
+
+    const content = document.body.cloneNode(true); // Clone to avoid layout shift
+    content.querySelector('.secondary-btn').remove(); // Remove button from cloned node
+
+    // Add temporary top margin to create space at the top
+    const spacer = document.createElement('div');
+    spacer.style.height = '40px'; // Adjust this value for more or less space
+    content.insertBefore(spacer, content.firstChild);
+
+    // Remove any empty space at the bottom
+    const removeEmptySpace = document.createElement('div');
+    removeEmptySpace.style.height = '1px'; // Avoid overflow causing blank pages
+    content.appendChild(removeEmptySpace);
+
+    // Use timeout to allow rendering
+    setTimeout(() => {
+        html2pdf().set({
+            margin: 1, // Adjusted for better margins
+            filename: 'IGrow Bonds Comparison.pdf',
+            image: { type: 'png', quality: 1 },
+            html2canvas: {
+                scale: 1,
+                useCORS: true,
+                scrollY: 0,
+                windowWidth: document.body.scrollWidth, // Ensure no extra width
+                windowHeight: document.body.scrollHeight // Capture only visible content
+            },
+            jsPDF: {
+                unit: 'pt',
+                format: 'a3',
+                orientation: 'landscape'
+            },
+            pagebreak: {
+                avoid: 'div',
+                mode: ['css', 'legacy'] // Prevent unnecessary pages
+            }
+        }).from(content).save().then(() => {
+            downloadButton.style.display = 'inline-block';
+        });
+    }, 500); // Wait 0.5s before capturing
+}
+  // Observer to toggle download button visibility
+  const observer = new MutationObserver(() => {
+    const results = document.getElementById("calc");
+    const buttonContainer = document.getElementById("downloadContainer");
+    if (results.style.display === "block") {
+        buttonContainer.style.display = "block";
+    } else {
+        buttonContainer.style.display = "none";
+    }
+  });
+
+    observer.observe(document.getElementById("calc"), {attributes: true, attributeFilter: ['style'] });
+
+    const rateInput = document.getElementById("rate");
+
+if (rateInput) {
+  rateInput.addEventListener("blur", () => {
+    let val = parseFloat(rateInput.value);
+    if (isNaN(val) || val < 0) val = 0;
+    if (val > 100) val = 100;
+    rateInput.value = val.toFixed(2);
+
+    const newRate = rateInput.value + "%";
+    const igrowCardRows = document.querySelectorAll(".igrow-card .comparison-row");
+
+    igrowCardRows.forEach(row => {
+      if (row.children[0]?.textContent?.trim() === "Rate") {
+        row.children[1].textContent = newRate;
+      }
+    });
+  });
+}
+
+let inactivityTime = 0;
+  let warningShown = false;
+
+  function resetTimer() {
+    inactivityTime = 0;
+    if (warningShown) {
+      warningShown = false;
+      const warningBox = document.getElementById('inactivity-warning');
+      if (warningBox) warningBox.remove();
+    }
+  }
+
+  function showWarning() {
+  if (!warningShown) {
+    warningShown = true;
+    const div = document.createElement("div");
+    div.id = "inactivity-warning";
+    div.innerText = "Closing app in the next 5 sec...";
+    div.style.position = "fixed";
+    div.style.bottom = "20px";
+    div.style.right = "20px";
+    div.style.background = "#ff0000";
+    div.style.padding = "15px";
+    div.style.fontWeight = "bold";
+    div.style.borderRadius = "10px";
+    div.style.zIndex = 9999;
+    div.style.transition = "opacity 2s ease-in-out"; // 🔧 Fade-in/fade-out
+    div.style.opacity = "0";
+
+    document.body.appendChild(div);
+
+    setTimeout(() => {
+      div.style.opacity = "1";
+    }, 1000);
+
+    // 🔧 After 4 seconds, start fading it out
+    setTimeout(() => {
+      div.style.opacity = "0";
+    }, 2500);
+  }
+}
+
+  setInterval(() => {
+    inactivityTime += 1;
+
+    if (inactivityTime === 5) {
+      showWarning();
+    }
+
+    if (inactivityTime >= 10) {
+      if (window.electronAPI && window.electronAPI.quitApp) {
+  window.electronAPI.quitApp();
+} else {
+  window.close(); // fallback for browser testing
+}
+    }
+  }, 1000);
+
+  // Reset inactivity timer on mouse or key interaction
+  ['mousemove', 'keydown', 'mousedown', 'touchstart'].forEach(event => {
+    window.addEventListener(event, resetTimer, true);
+  });
+
+  function showSpinner(button) {
+    const originalText = button.innerHTML;
+    button.dataset.originalText = originalText;
+    button.innerHTML = originalText + '<span class="button-spinner"></span>';
+  }
+
+  function resetSpinner(button) {
+    if (button.dataset.originalText) {
+      button.innerHTML = button.dataset.originalText;
+      delete button.dataset.originalText;
+    }
+  }
+
+  function disableAllButtons() {
+    document.querySelectorAll('button').forEach(btn => {
+      btn.classList.add('button-disabled');
+      btn.disabled = true;
+    });
+  }
+
+  function enableAllButtons() {
+    document.querySelectorAll('button').forEach(btn => {
+      btn.classList.remove('button-disabled');
+      btn.disabled = false;
+      resetSpinner(btn);
+    });
+  }
+
+  function withSpinner(fn, button) {
+    showSpinner(button);
+    disableAllButtons();
+
+    setTimeout(() => {
+      fn();
+      enableAllButtons();
+    }, 2000);
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const calcButton = document.getElementById('calc');
+    const switchButton = document.querySelector('.switch-btn');
+    const printButton = document.querySelector('.secondary-btn');
+
+    if (calcButton) {
+      calcButton.setAttribute('onclick', 'withSpinner(calculate, this)');
+    }
+    if (switchButton) {
+      switchButton.setAttribute('onclick', 'withSpinner(Onswitch, this)');
+    }
+    if (printButton) {
+      printButton.setAttribute('onclick', 'withSpinner(downloadPDF, this)');
+    }
+  });
+  
+</script>
+
+</body>
+</html>

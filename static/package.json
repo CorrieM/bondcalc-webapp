@@ -1,0 +1,71 @@
+{
+  "name": "IGrowBondsCalculator",
+  "version": "1.0.0",
+  "description": "IGrow Bonds Calculator Standalone Application",
+  "author": "Corrie Muller",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "package-win": "electron-packager . IGrowBondsCalculator --platform=win32 --arch=x64 --out=dist --overwrite",
+    "build": "electron-builder build --win portable"
+  },
+  "devDependencies": {
+    "electron": "^25.9.8",
+    "electron-builder": "^25.1.8",
+    "electron-packager": "^16.0.0"
+  },
+  "build": {
+  "appId": "com.igrow.bondscalculator",
+  "productName": "IGrowBondsCalculator",
+    "asar": false,
+    "files": [
+      "main.js",
+      "preload.js",
+      "backend/**",
+      "frontend/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "frontend/logo.ico",
+        "to": "logo.ico"
+      },
+      {
+        "from": "backend/app.py",
+        "to": "backend/app.py"
+      },
+      {
+        "from": "backend/Bonds Calculator.xlsx",
+        "to": "backend/Bonds Calculator.xlsx"
+      }
+    ],
+	"extraResources": [
+    {
+      "from": "backend/dist/app.exe",
+      "to": "app.exe"
+    },
+    {
+      "from": "backend/Bonds Calculator.xlsx",
+      "to": "Bonds Calculator.xlsx"
+    }
+  ],
+    "extraFiles": [
+      {
+        "from": "backend/",
+        "to": "backend/",
+        "filter": [
+          "app.exe",
+          "Bonds Calculator.xlsx"
+        ]
+      }
+    ]
+  },
+  "win": {
+      "requestedExecutionLevel": "requireAdministrator",
+	  "target": "portable",
+      "icon": "frontend/logo.ico"
+    },
+  "dependencies": {
+    "tree-kill": "^1.2.2"
+  }
+}
