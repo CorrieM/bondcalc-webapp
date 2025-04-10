@@ -237,7 +237,7 @@ def login():
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    user = session.get("user", "Unknown")
+    user = session.get("user", "Error")
     session.clear()
     logger.info(f"User {user} logged out.")
     return jsonify({"message": "Logged out successfully", "status": "success"})
